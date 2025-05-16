@@ -1,10 +1,7 @@
-import random
-
-tamaño_tablero = 5
-pos_salida = (3, 2)  # ruta de salida del raton 
+pos_salida = (3, 2)  # ruta de salida del raton
 
 
-#Entorno del juego  - (matriz_bidimensional) 
+# Entorno del juego - (matriz_bidimensional)
 def imprimir_tablero(tamaño, pos_gato, pos_raton):   
     for i in range(tamaño):
         for j in range(tamaño):
@@ -17,7 +14,7 @@ def imprimir_tablero(tamaño, pos_gato, pos_raton):
         print()
     print()
 
-#Tipos de desplazamientos en el entorno (matriz_bidimensional)        
+# Tipos de desplazamientos en el entorno (matriz_bidimensional)        
 def movimientos_posibles(posicion, tamaño_tablero):
     x, y = posicion
     movimientos = [
@@ -29,7 +26,7 @@ def movimientos_posibles(posicion, tamaño_tablero):
     return [(x, y) for x, y in movimientos if 0 <= x < tamaño_tablero and 0 <= y < tamaño_tablero]
 
 
-#Logica para aplicar los movimientos del gato            
+# Logica para aplicar los movimientos del gato            
 def utilidad(pos_gato, pos_raton):
     if pos_gato == pos_raton:
         return float('inf')  # Gato gana
@@ -37,24 +34,26 @@ def utilidad(pos_gato, pos_raton):
     dist = abs(pos_gato[0] - pos_raton[0]) + abs(pos_gato[1] - pos_raton[1])
     return -dist  # Menor distancia es peor para el ratón
 
-def minimax(pos_gato, pos_raton, profundidad, maximizando):
+
+def minimax(pos_gato, pos_raton, profundidad, maximizando, tamaño_tablero):
     if profundidad == 0 or pos_gato == pos_raton:
         return utilidad(pos_gato, pos_raton)
     
     if maximizando:
         max_eval = float('-inf')
-        for movimiento in movimientos_posibles(pos_gato,tamaño_tablero):
-            eval = minimax( movimiento, pos_raton, profundidad - 1, False)
+        for movimiento in movimientos_posibles(pos_gato, tamaño_tablero):
+            eval = minimax(movimiento, pos_raton, profundidad - 1, False, tamaño_tablero)
             max_eval = max(max_eval, eval)
         return max_eval
     else:
         min_eval = float('inf')
-        for movimiento in movimientos_posibles(pos_raton,tamaño_tablero):
-            eval = minimax(pos_gato, movimiento, profundidad - 1, True)
+        for movimiento in movimientos_posibles(pos_raton, tamaño_tablero):
+            eval = minimax(pos_gato, movimiento, profundidad - 1, True, tamaño_tablero)
             min_eval = min(min_eval, eval)
         return min_eval
 
-#Logica para aplicar los movimientos del raton            
+
+# Logica para aplicar los movimientos del raton            
 def movimiento_raton(pos_raton, pos_salida, tamaño_tablero):
     posibles_movimientos = movimientos_posibles(pos_raton, tamaño_tablero)
     mejor_movimiento = None
@@ -69,24 +68,20 @@ def movimiento_raton(pos_raton, pos_salida, tamaño_tablero):
     return mejor_movimiento
 
 
-#Funcion que controla el flujo del juego
-def jugar(tamaño, pos_gato, pos_raton, profundidad, max_turnos,pos_salida):
-    #Inicializacion del juego
-    tablero = (tamaño, pos_gato, pos_raton)#almacena la configuración inicial del tablero
-    turno_gato = True   #gato primero en moverse        
+# Funcion que controla el flujo del juego
+def jugar(tamaño, pos_gato, pos_raton, profundidad, max_turnos, pos_salida):
+    turno_gato = True   # gato primero en moverse        
     turno_actual = 0
     
-    #Ejecucion del juego  
+    # Ejecucion del juego  
     while pos_gato != pos_raton and turno_actual < max_turnos:  
-        if turno_actual==0:
-            print("Estado Inicial del juego:") 
         imprimir_tablero(tamaño, pos_gato, pos_raton)
        
         if turno_gato:
             mejor_movimiento = None
             mejor_valor = float('-inf')
             for movimiento in movimientos_posibles(pos_gato, tamaño):
-                valor = minimax(movimiento, pos_raton, profundidad, False)
+                valor = minimax(movimiento, pos_raton, profundidad, False, tamaño)
                 if valor > mejor_valor:
                     mejor_valor = valor
                     mejor_movimiento = movimiento
@@ -97,21 +92,22 @@ def jugar(tamaño, pos_gato, pos_raton, profundidad, max_turnos,pos_salida):
             print(f"Turno {turno_actual + 1}: El ratón se mueve de {pos_raton} a {nuevo_movimiento_raton}")
             pos_raton = nuevo_movimiento_raton
        
-        turno_gato = not turno_gato #alternar los turnos    
-        turno_actual += 1#actualizar los turnos      
+        turno_gato = not turno_gato  # alternar los turnos    
+        turno_actual += 1  # actualizar los turnos      
 
-        
-        if pos_raton == pos_salida: #evaluar la condicion de salida del raton          
+        # Evaluar la condicion de salida del raton          
+        if pos_raton == pos_salida:          
             imprimir_tablero(tamaño, pos_gato, pos_raton)
             print("El ratón ha escapado!")
             return
     
-    #imprimimos el tablero cuando se cumplen las condiciones de salida del bucle
+    # Imprimir el tablero cuando se cumplen las condiciones de salida del bucle
     imprimir_tablero(tamaño, pos_gato, pos_raton)            
     if pos_gato == pos_raton:
         print("El gato ha capturado al ratón!")
     else:
         print("Se acabaron los intentos")
 
+
 # Inicializar y jugar
-jugar(tamaño=5, pos_gato=(0, 0), pos_raton=(4, 4), profundidad=3, max_turnos=10,pos_salida=pos_salida)
+jugar(tamaño=5, pos_gato=(0, 0), pos_raton=(4, 4), profundidad=3, max_turnos=10, pos_salida=pos_salida)
